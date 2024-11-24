@@ -16,7 +16,7 @@ def create_app():
         'DATABASE_URL', 'sqlite:///produtos.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv(
-        'JWT_SECRET_KEY', 'sua_chave_secreta')
+        'JWT_SECRET_KEY')
 
     db.init_app(app)
     jwt.init_app(app)

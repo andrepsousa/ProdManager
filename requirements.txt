@@ -1,4 +1,14 @@
-flask==2.3.3
-flask-sqlalchemy==3.0.5
-flask-jwt-extended==4.4.4
+blinker==1.9.0
+click==8.1.7
+Flask==2.3.3
+Flask-JWT-Extended==4.4.4
+Flask-SQLAlchemy==3.0.5
+greenlet==3.1.1
+itsdangerous==2.2.0
+Jinja2==3.1.4
+MarkupSafe==3.0.2
+PyJWT==2.10.0
 python-dotenv==1.0.0
+SQLAlchemy==2.0.36
+typing_extensions==4.12.2
+Werkzeug==3.1.3

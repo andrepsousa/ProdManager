@@ -32,17 +32,21 @@ def create_product(data):
 
         if not data.get("name") or not data.get("price"):
             raise ValueError("O nome e o preço do produto são obrigatórios.")
+        if data.get("price") > 0:
 
-        new_product = Product(
-            name=data.get("name"),
-            price=data.get("price"),
-            description=data.get("description")
-        )
+            new_product = Product(
+                name=data.get("name"),
+                price=data.get("price"),
+                description=data.get("description")
+            )
 
-        db.session.add(new_product)
-        db.session.commit()
+            db.session.add(new_product)
+            db.session.commit()
 
-        return new_product
+            return new_product
+        
+        else:
+            raise ValueError("O valor do produto deve ser positivo.")
     except Exception as e:
         db.session.rollback()
         print(f'Erro ao adicionar produto {e}')
