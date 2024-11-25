@@ -1,5 +1,5 @@
-from app import db
-from app.models import Product
+from app.utils import db
+from app.models.models import Product
 
 
 def list_products():

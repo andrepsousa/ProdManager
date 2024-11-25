@@ -1,5 +1,5 @@
-from app import create_app, db
-from app.models import User
+from app.utils import create_app, db
+from app.models.models import User
 
 app = create_app()
 

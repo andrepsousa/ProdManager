@@ -1,5 +1,5 @@
-from app import db
-from app.models import User
+from app.utils import db
+from app.models.models import User
 
 
 def register_user(username, password, email):

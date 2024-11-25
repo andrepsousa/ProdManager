@@ -21,7 +21,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    from app.routes import main_bp
+    from app.routes.routes import main_bp
     app.register_blueprint(main_bp)
 
     return app

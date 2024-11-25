@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
-from app.product_models import (
+from app.models.product_models import (
     list_products, create_product, update_product,
     delete_product, product_by_id
 )
-from app.user_models import register_user
-from app.models import Product, User
+from app.models.user_models import register_user
+from app.models.models import Product, User
 from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity
 )

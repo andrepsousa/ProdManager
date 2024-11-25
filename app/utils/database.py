@@ -1,4 +1,4 @@
-from app import db
+from app.utils import db
 
 
 def init_db(app):
