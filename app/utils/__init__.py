@@ -1,12 +1,15 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 db = SQLAlchemy()
 jwt = JWTManager()
+
+migrate = Migrate()
 
 
 def create_app():
@@ -20,6 +23,9 @@ def create_app():
 
     db.init_app(app)
     jwt.init_app(app)
+    migrate.init_app(app, db)
+
+    from app.models.models import Product, User
 
     from app.routes.routes import main_bp
     app.register_blueprint(main_bp)

@@ -135,7 +135,7 @@ def login():
     user = User.query.filter_by(username=data.get("username")).first()
     if user and user.check_password(data.get("password")):
         access_token = create_access_token(
-            identity=str(user.username))
+            identity=str(user.username), expires_delta=timedelta(hours=1))
         return jsonify(access_token=access_token), 200
     else:
         return jsonify({"error": "Credenciais invalidas"}), 401
