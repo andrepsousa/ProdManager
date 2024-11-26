@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, url_for, flash
 from app.models.product_models import (
     list_products, create_product, update_product,
     delete_product, product_by_id
@@ -12,9 +12,10 @@ from flask_jwt_extended import (
 main_bp = Blueprint('main', __name__)
 
 
-@main_bp.route('/')
-def home():
-    return 'API ProdManager'
+@main_bp.route('/', methods=["GET"], endpoint='index')
+def index():
+    product = Product.query.all()
+    return render_template('index.html', product=product)
 
 
 @main_bp.route('/produtos', methods=['GET'],
