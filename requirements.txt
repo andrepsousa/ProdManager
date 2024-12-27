@@ -3,7 +3,6 @@ blinker==1.9.0
 click==8.1.7
 Flask==2.3.3
 Flask-JWT-Extended==4.4.4
-Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.0.5
 greenlet==3.1.1
 itsdangerous==2.2.0

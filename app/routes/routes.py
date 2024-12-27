@@ -12,7 +12,7 @@ from flask_jwt_extended import (
 main_bp = Blueprint('main', __name__)
 
 
-@main_bp.route('/', methods=["GET"], endpoint='index')
+@main_bp.route('/')
 def index():
     product = Product.query.all()
     return render_template('index.html', product=product)
@@ -113,20 +113,21 @@ def delete_product_view(id_product):
 
 @main_bp.route('/cadastro', methods=["POST"],
                endpoint='register_view')
-@jwt_required()
 def register_view():
-    data = request.get_json()
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
+
     try:
-        user = register_user(
-            username=data["username"],
-            password=data["password"],
-            email=data["email"]
-        )
-        return jsonify({"message": "Usuario registrado com sucesso!"}), 201
+        user = register_user(username=username, email=email, password=password)
+        flash("Usuário registrado com sucesso!", "success")
+        return render_template("user/login.html")
     except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        flash(f"Erro: {e}", "danger")
+        return render_template("user/register.html")
     except Exception as e:
-        return jsonify({"error": f"Erro inesperado: {str(e)}"}), 500
+        flash(f"Erro inesperado: {str(e)}", "danger")
+        return render_template("register.html")
 
 
 @main_bp.route('/login', methods=["POST"],
