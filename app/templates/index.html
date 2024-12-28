@@ -4,31 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProdManager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <div class="titulo">
-            <h1>Bem-vindo ao ProdManager</h1>
-        </div>
-        <nav>
-            <button onclick="window.location.href='/login'">Login</button>
-            <button onclick="window.location.href='{{ url_for('main.register_view') }}'">Cadastro</button>
-        </nav>
-    </header>
-    <main>
-        <section class="produtos">
-            <h2>Produtos Disponíveis</h2>
-            <ul>
-                {% for produto in product %}
-                    <li>
-                        <strong>{{ produto.name }}</strong> - R$ {{ produto.price }}
-                    </li>
+    <div class="container">
+        <header class="mb-4">
+            <div class="titulo">
+                <h1 class="mt-4">Bem-vindo ao ProdManager</h1>
+                {% if current_user.is_authenticated %}
+                    <p>Olá, {{ current_user.username }}!</p>
+                {% endif %}
+            </div>
+            <nav class="mt-3">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.get_products') }}" class="btn btn-info">Gerenciar Produtos</a>
+                    <a href="{{ url_for('main.logout') }}" class="btn btn-secondary">Logout</a>
                 {% else %}
-                    <li>Nenhum produto encontrado.</li>
-                {% endfor %}
-            </ul>
-        </section>
-    </main>
+                    <a href="{{ url_for('main.login') }}" class="btn btn-primary">Login</a>
+                    <a href="{{ url_for('main.register_view') }}" class="btn btn-secondary">Cadastro</a>
+                {% endif %}
+            </nav>
+        </header>
+        <main>
+            <section class="produtos">
+                <h2>Produtos Disponíveis</h2>
+                {% if product %}
+                    <ul class="list-group">
+                        {% for produto in product %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>{{ produto.name }}</strong>
+                                <span class="badge bg-primary rounded-pill">R$ {{ produto.price }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Nenhum produto encontrado.</p>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='logout.js') }}"></script> 
 </body>
 </html>

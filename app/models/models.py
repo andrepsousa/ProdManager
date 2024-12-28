@@ -1,3 +1,4 @@
+from flask_login import UserMixin
 from app.utils import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -10,7 +11,7 @@ class Product(db.Model):
     description = db.Column(db.Text, nullable=True)
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)

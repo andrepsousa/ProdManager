@@ -4,15 +4,17 @@ from app.models.models import Product
 
 def list_products():
     products = Product.query.all()
-    return [
+    result = [
         {
             "id": product.id,
-            "nome": product.name,
-            "preco": product.price,
-            "descricao": product.description
+            "name": product.name,
+            "price": product.price,
+            "description": product.description
         }
         for product in products
     ]
+    print("Products:", result)  # Debug print
+    return result
 
 
 def product_by_id(id_product):
@@ -44,7 +46,7 @@ def create_product(data):
             db.session.commit()
 
             return new_product
-        
+
         else:
             raise ValueError("O valor do produto deve ser positivo.")
     except Exception as e:
