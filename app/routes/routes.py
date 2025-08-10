@@ -1,21 +1,23 @@
-from flask import render_template, request, redirect, url_for, flash, session
-from flask_login import login_user, login_required, logout_user, current_user
+# app/routes/routes.py
 from flask import (
-    Blueprint, jsonify, request, render_template, url_for, flash, redirect
-    )
-from app.models.product_models import (
-    list_products, create_product, update_product,
-    delete_product, product_by_id
-    )
-from app.models.user_models import register_user
-from app.models.models import Product, User
-from flask_jwt_extended import (
-    create_access_token, jwt_required, get_jwt_identity
+    Blueprint, jsonify, request, render_template, url_for, flash, redirect, session
 )
-from datetime import timedelta
+from flask_login import login_user, login_required, logout_user
 from werkzeug.exceptions import BadRequest
 
+# MODELOS / FUNÇÕES DE NEGÓCIO
+from app.models.product_models import (
+    list_products, create_product, update_product, delete_product, product_by_id
+)
+from app.models.user_models import register_user
+from app.models.models import Product, User
+
+# Keycloak / OIDC
+from app.security import require_oauth, has_role
+
 main_bp = Blueprint('main', __name__)
+
+# ---------------- ROTAS HTML (mantidas) ----------------
 
 
 @main_bp.route('/')
@@ -28,12 +30,10 @@ def index():
 @login_required
 def get_products():
     products = list_products()
-    print("Products in get_products:", products)  # Debug print
     return render_template('product/list.html', products=products)
 
 
-@main_bp.route('/produtos/<int:id_product>', methods=["GET"],
-               endpoint='get_products_id')
+@main_bp.route('/produtos/<int:id_product>', methods=["GET"], endpoint='get_products_id')
 @login_required
 def get_products_id(id_product):
     try:
@@ -47,13 +47,11 @@ def get_products_id(id_product):
         return redirect(url_for('main.get_products'))
 
 
-@main_bp.route('/produtos/novo', methods=["GET", "POST"],
-               endpoint='create_product_view')
+@main_bp.route('/produtos/novo', methods=["GET", "POST"], endpoint='create_product_view')
 @login_required
 def create_product_view():
     if request.method == "GET":
         return render_template('product/create.html')
-
     try:
         data = request.form
         new_product_data = {
@@ -61,7 +59,6 @@ def create_product_view():
             "price": float(data["price"]),
             "description": data.get("description")
         }
-
         create_product(new_product_data)
         flash("Produto criado com sucesso.", "success")
         return redirect(url_for('main.get_products'))
@@ -73,14 +70,12 @@ def create_product_view():
         return render_template('product/create.html')
 
 
-@main_bp.route('/produtos/<int:id_product>/editar', methods=["GET", "POST"],
-               endpoint='update_product_view')
+@main_bp.route('/produtos/<int:id_product>/editar', methods=["GET", "POST"], endpoint='update_product_view')
 @login_required
 def update_product_view(id_product):
     product = product_by_id(id_product)
     if request.method == "GET":
         return render_template('product/edit.html', product=product)
-
     try:
         data = request.form
         updated_data = {
@@ -88,7 +83,6 @@ def update_product_view(id_product):
             "price": float(data["price"]),
             "description": data.get("description")
         }
-
         update_product(id_product, updated_data)
         flash("Produto atualizado com sucesso.", "success")
         return redirect(url_for('main.get_products'))
@@ -100,14 +94,12 @@ def update_product_view(id_product):
         return render_template('product/edit.html', product=product)
 
 
-@main_bp.route('/produtos/<int:id_product>/deletar', methods=["GET", "POST"],
-               endpoint='delete_product_view')
+@main_bp.route('/produtos/<int:id_product>/deletar', methods=["GET", "POST"], endpoint='delete_product_view')
 @login_required
 def delete_product_view(id_product):
     product = product_by_id(id_product)
     if request.method == "GET":
         return render_template('product/delete.html', product=product)
-
     try:
         delete_product(id_product)
         flash("Produto deletado com sucesso!", "success")
@@ -120,14 +112,12 @@ def delete_product_view(id_product):
         return redirect(url_for('main.get_products'))
 
 
-@main_bp.route('/cadastro', methods=["GET", "POST"],
-               endpoint='register_view')
+@main_bp.route('/cadastro', methods=["GET", "POST"], endpoint='register_view')
 def register_view():
     if request.method == 'GET':
         return render_template("user/register.html")
-
     elif request.method == 'POST':
-        try: 
+        try:
             username = request.form.get('username')
             email = request.form.get('email')
             password = request.form.get('password')
@@ -152,15 +142,9 @@ def register_view():
             flash(f"Erro inesperado: {str(e)}", "danger")
             return render_template("user/register.html"), 500
 
-    return "Método não permitido", 405
 
-
-@main_bp.route('/login', methods=["GET", "POST"],
-               endpoint='login')
+@main_bp.route('/login', methods=["GET", "POST"], endpoint='login')
 def login():
-    '''if request.method == 'GET':
-        return render_template("user/login.html")'''
-
     if request.method == 'POST':
         username = request.form.get("username")
         password = request.form.get("password")
@@ -174,11 +158,80 @@ def login():
     return render_template("user/login.html")
 
 
-@main_bp.route('/logout', methods=['GET', 'POST'],
-               endpoint='logout')
+@main_bp.route('/logout', methods=['GET', 'POST'], endpoint='logout')
 @login_required
 def logout():
     logout_user()
     session.clear()
     flash("Logout realizado com sucesso.", "success")
     return redirect(url_for('main.index'))
+
+# ---------------- API REST (Keycloak) ----------------
+
+
+@main_bp.get('/api/produtos')
+@require_oauth()
+def api_list_products():
+    """Lista produtos - requer access_token válido."""
+    return jsonify(list_products()), 200
+
+
+@main_bp.get('/api/produtos/<int:id_product>')
+@require_oauth()
+def api_get_product(id_product: int):
+    try:
+        prod = product_by_id(id_product)
+        return jsonify(prod), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+
+@main_bp.post('/api/produtos')
+@require_oauth()
+def api_create_product():
+    """Cria produto - requer role products:write no client 'prodmanager-api'."""
+    if not has_role("products:write"):
+        return jsonify({"error": "forbidden"}), 403
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        new_prod = create_product({
+            "name": data["name"],
+            "price": float(data["price"]),
+            "description": data.get("description"),
+        })
+        return jsonify(new_prod), 201
+    except KeyError as e:
+        return jsonify({"error": f"Campo faltando: {e}"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@main_bp.put('/api/produtos/<int:id_product>')
+@require_oauth()
+def api_update_product(id_product: int):
+    if not has_role("products:write"):
+        return jsonify({"error": "forbidden"}), 403
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        upd = update_product(id_product, {
+            "name": data["name"],
+            "price": float(data["price"]),
+            "description": data.get("description"),
+        })
+        return jsonify(upd), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except KeyError as e:
+        return jsonify({"error": f"Campo faltando: {e}"}), 400
+
+
+@main_bp.delete('/api/produtos/<int:id_product>')
+@require_oauth()
+def api_delete_product(id_product: int):
+    if not has_role("products:write"):
+        return jsonify({"error": "forbidden"}), 403
+    try:
+        delete_product(id_product)
+        return "", 204
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
