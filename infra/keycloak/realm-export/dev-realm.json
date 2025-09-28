@@ -1,0 +1,49 @@
+{
+  "realm": "dev",
+  "enabled": true,
+  "displayName": "Dev Realm",
+  "duplicateEmailsAllowed": false,
+  "loginWithEmailAllowed": true,
+  "registrationAllowed": false,
+  "rememberMe": true,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "internationalizationEnabled": true,
+  "supportedLocales": ["en", "pt-BR"],
+  "defaultLocale": "pt-BR",
+  "clients": [
+    {
+      "clientId": "prodmanager-api",
+      "name": "ProdManager API",
+      "description": "API backend do ProdManager (validação de bearer tokens)",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "frontchannelLogout": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "rootUrl": "",
+      "baseUrl": "",
+      "webOrigins": [],
+      "redirectUris": []
+    }
+  ],
+  "users": [],
+  "groups": [],
+  "roles": {
+    "realm": []
+  },
+  "clientScopes": [],
+  "defaultDefaultClientScopes": ["web-origins", "roles", "profile", "email"],
+  "defaultOptionalClientScopes": ["address", "phone", "offline_access", "microprofile-jwt"]
+}

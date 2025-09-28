@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: prodmanager-keycloak
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./infra/keycloak/realm-export:/opt/keycloak/data/import
+      - kc_data:/opt/keycloak/data
+
+volumes:
+  kc_data:
