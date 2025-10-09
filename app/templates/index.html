@@ -16,6 +16,17 @@
                 {% if current_user.is_authenticated %}
                     <p>Olá, {{ current_user.username }}!</p>
                 {% endif %}
+
+                {% with messages = get_flashed_messages(with_categories=true, category_filter=['auth_success','auth_danger']) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ 'alert-success' if category == 'auth_success' else 'alert-danger' }} mt-3" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
             </div>
             <nav class="mt-3">
                 {% if current_user.is_authenticated %}
@@ -35,7 +46,7 @@
                         {% for produto in product %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <strong>{{ produto.name }}</strong>
-                                <span class="badge bg-primary rounded-pill">R$ {{ produto.price }}</span>
+                                <span class="badge bg-primary rounded-pill">R$ {{ "%.2f"|format(produto.price) }}</span>
                             </li>
                         {% endfor %}
                     </ul>

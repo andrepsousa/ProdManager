@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 from app.utils import db
 from app.models.models import Product
 
@@ -15,7 +15,6 @@ def _to_dict(p: Product) -> Dict:
 def list_products() -> List[Dict]:
     products = Product.query.all()
     result = [_to_dict(p) for p in products]
-    # print("Products:", result)  # debug opcional
     return result
 
 
@@ -27,10 +26,6 @@ def product_by_id(id_product: int) -> Dict:
 
 
 def create_product(data: Dict) -> Dict:
-    """
-    Espera data com: name (str), price (num), description (str|None)
-    Retorna o produto criado como dict.
-    """
     name = (data.get("name") or "").strip()
     if not name:
         raise ValueError("O nome do produto é obrigatório.")
@@ -90,7 +85,7 @@ def delete_product(id_product: int) -> Dict:
     if not product:
         raise ValueError("Produto não encontrado.")
     try:
-        as_dict = _to_dict(product)  # útil para logs/retorno
+        as_dict = _to_dict(product)
         db.session.delete(product)
         db.session.commit()
         return as_dict

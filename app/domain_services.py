@@ -42,7 +42,8 @@ class CreateProductUseCase:
     repo: ProductRepo
     notifier: Notifier
 
-    def execute(self, name: str, price: float, description: str | None = None) -> ProductDTO:
+    def execute(self, name: str, price: float,
+                description: str | None = None) -> ProductDTO:
         product = ProductDTO(id=None, name=name,
                              price=price, description=description)
         product.id = self.repo.next_id()

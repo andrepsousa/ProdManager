@@ -11,13 +11,16 @@
     <div class="container mt-5">
         <h1 class="mb-4">Lista de Produtos</h1>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% with messages = get_flashed_messages(with_categories=true, category_filter=['product_success','product_danger']) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    <div class="alert {{ 'alert-success' if category == 'product_success' else 'alert-danger' }}">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
+
 
         <a href="{{ url_for('main.create_product_view') }}" class="btn btn-primary mb-3">Adicionar Novo Produto</a>
 

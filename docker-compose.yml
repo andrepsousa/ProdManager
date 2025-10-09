@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:25.0
@@ -14,6 +12,22 @@ services:
     volumes:
       - ./infra/keycloak/realm-export:/opt/keycloak/data/import
       - kc_data:/opt/keycloak/data
+
+  backend:
+    build: .
+    container_name: prodmanager-backend
+    # espera o Keycloak ficar "ready" na porta de management 9000
+    command: sh -lc 'until curl -fsS http://keycloak:9000/health/ready; do echo "aguardando Keycloak..."; sleep 2; done; python run.py'
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - keycloak
+    volumes:
+      - .:/app
+    working_dir: /app
+
 
 volumes:
   kc_data:

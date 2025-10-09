@@ -1,23 +1,21 @@
 # app/routes/routes.py
 from flask import (
-    Blueprint, jsonify, request, render_template, url_for, flash, redirect, session
+    Blueprint, jsonify, request, render_template,
+    url_for, flash, redirect, session
 )
 from flask_login import login_user, login_required, logout_user
 from werkzeug.exceptions import BadRequest
 
-# MODELOS / FUNÇÕES DE NEGÓCIO
 from app.models.product_models import (
-    list_products, create_product, update_product, delete_product, product_by_id
+    list_products, create_product, update_product,
+    delete_product, product_by_id
 )
 from app.models.user_models import register_user
 from app.models.models import Product, User
-
-# Keycloak / OIDC
 from app.security import require_oauth, has_role
+from flask.typing import ResponseReturnValue
 
 main_bp = Blueprint('main', __name__)
-
-# ---------------- ROTAS HTML (mantidas) ----------------
 
 
 @main_bp.route('/')
@@ -33,21 +31,23 @@ def get_products():
     return render_template('product/list.html', products=products)
 
 
-@main_bp.route('/produtos/<int:id_product>', methods=["GET"], endpoint='get_products_id')
+@main_bp.route('/produtos/<int:id_product>', methods=["GET"],
+               endpoint='get_products_id')
 @login_required
 def get_products_id(id_product):
     try:
         product = product_by_id(id_product)
         return render_template('product/detail.html', product=product)
     except ValueError as e:
-        flash(str(e), "danger")
+        flash(str(e), "product_danger")
         return redirect(url_for('main.get_products'))
     except Exception as e:
-        flash(f"Erro inesperado: {str(e)}", "danger")
+        flash(f"Erro inesperado: {str(e)}", "product_danger")
         return redirect(url_for('main.get_products'))
 
 
-@main_bp.route('/produtos/novo', methods=["GET", "POST"], endpoint='create_product_view')
+@main_bp.route('/produtos/novo', methods=["GET", "POST"],
+               endpoint='create_product_view')
 @login_required
 def create_product_view():
     if request.method == "GET":
@@ -60,17 +60,18 @@ def create_product_view():
             "description": data.get("description")
         }
         create_product(new_product_data)
-        flash("Produto criado com sucesso.", "success")
+        flash("Produto criado com sucesso.", "product_success")
         return redirect(url_for('main.get_products'))
     except KeyError as e:
-        flash(f"Campo faltando na requisição: {str(e)}", "danger")
+        flash(f"Campo faltando na requisição: {str(e)}", "product_danger")
         return render_template('product/create.html')
     except Exception as e:
-        flash(f"Erro ao criar o produto: {str(e)}", "danger")
+        flash(f"Erro ao criar o produto: {str(e)}", "product_danger")
         return render_template('product/create.html')
 
 
-@main_bp.route('/produtos/<int:id_product>/editar', methods=["GET", "POST"], endpoint='update_product_view')
+@main_bp.route('/produtos/<int:id_product>/editar', methods=["GET", "POST"],
+               endpoint='update_product_view')
 @login_required
 def update_product_view(id_product):
     product = product_by_id(id_product)
@@ -84,17 +85,18 @@ def update_product_view(id_product):
             "description": data.get("description")
         }
         update_product(id_product, updated_data)
-        flash("Produto atualizado com sucesso.", "success")
+        flash("Produto atualizado com sucesso.", "product_success")
         return redirect(url_for('main.get_products'))
     except ValueError as e:
-        flash(str(e), "danger")
+        flash(str(e), "product_danger")
         return render_template('product/edit.html', product=product)
     except Exception as e:
-        flash(f"Erro ao atualizar o produto: {str(e)}", "danger")
+        flash(f"Erro ao atualizar o produto: {str(e)}", "product_danger")
         return render_template('product/edit.html', product=product)
 
 
-@main_bp.route('/produtos/<int:id_product>/deletar', methods=["GET", "POST"], endpoint='delete_product_view')
+@main_bp.route('/produtos/<int:id_product>/deletar', methods=["GET", "POST"],
+               endpoint='delete_product_view')
 @login_required
 def delete_product_view(id_product):
     product = product_by_id(id_product)
@@ -102,18 +104,18 @@ def delete_product_view(id_product):
         return render_template('product/delete.html', product=product)
     try:
         delete_product(id_product)
-        flash("Produto deletado com sucesso!", "success")
+        flash("Produto deletado com sucesso!", "product_success")
         return redirect(url_for('main.get_products'))
     except ValueError as e:
-        flash(str(e), "danger")
+        flash(str(e), "product_danger")
         return redirect(url_for('main.get_products'))
     except Exception as e:
-        flash(f"Erro ao deletar o produto: {str(e)}", "danger")
+        flash(f"Erro ao deletar o produto: {str(e)}", "product_danger")
         return redirect(url_for('main.get_products'))
 
 
 @main_bp.route('/cadastro', methods=["GET", "POST"], endpoint='register_view')
-def register_view():
+def register_view() -> ResponseReturnValue:
     if request.method == 'GET':
         return render_template("user/register.html")
     elif request.method == 'POST':
@@ -122,25 +124,27 @@ def register_view():
             email = request.form.get('email')
             password = request.form.get('password')
         except BadRequest:
-            flash("Formulário inválido", "danger")
+            flash("Formulário inválido", "register_danger")
             return render_template("user/register.html"), 400
 
         if not username or not email or not password:
-            flash("Todos os campos são obrigatórios.", "danger")
+            flash("Todos os campos são obrigatórios.", "register_danger")
             return render_template("user/register.html"), 400
 
         try:
             user = register_user(
                 username=username, email=email, password=password)
             login_user(user)
-            flash("Usuário registrado com sucesso!", "success")
+            flash("Usuário registrado com sucesso!", "register_success")
             return redirect(url_for('main.index'))
         except ValueError as e:
-            flash(f"Erro: {e}", "danger")
+            flash(f"Erro: {e}", "register_danger")
             return render_template("user/register.html"), 400
         except Exception as e:
-            flash(f"Erro inesperado: {str(e)}", "danger")
+            flash(f"Erro inesperado: {str(e)}", "register_danger")
             return render_template("user/register.html"), 500
+        
+    return "Method Not Allowed", 405
 
 
 @main_bp.route('/login', methods=["GET", "POST"], endpoint='login')
@@ -151,10 +155,10 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             login_user(user)
-            flash("Login bem-sucedido!", "success")
+            flash("Login bem-sucedido!", "auth_success")
             return redirect(url_for('main.index'))
         else:
-            flash("Credenciais inválidas", "danger")
+            flash("Credenciais inválidas", "auth_danger")
     return render_template("user/login.html")
 
 
@@ -163,16 +167,13 @@ def login():
 def logout():
     logout_user()
     session.clear()
-    flash("Logout realizado com sucesso.", "success")
+    flash("Logout realizado com sucesso.", "auth_success")
     return redirect(url_for('main.index'))
-
-# ---------------- API REST (Keycloak) ----------------
 
 
 @main_bp.get('/api/produtos')
 @require_oauth()
 def api_list_products():
-    """Lista produtos - requer access_token válido."""
     return jsonify(list_products()), 200
 
 
@@ -189,7 +190,6 @@ def api_get_product(id_product: int):
 @main_bp.post('/api/produtos')
 @require_oauth()
 def api_create_product():
-    """Cria produto - requer role products:write no client 'prodmanager-api'."""
     if not has_role("products:write"):
         return jsonify({"error": "forbidden"}), 403
     data = request.get_json(force=True, silent=True) or {}

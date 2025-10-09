@@ -13,13 +13,16 @@
             <div class="col-md-6">
                 <h2 class="text-center mb-4">Cadastro</h2>
                 
-                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% with messages = get_flashed_messages(with_categories=true, category_filter=['register_success','register_danger']) %}
                     {% if messages %}
                         {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                            <div class="alert {{ 'alert-success' if category == 'register_success' else 'alert-danger' }}">
+                                {{ message }}
+                            </div>
                         {% endfor %}
                     {% endif %}
                 {% endwith %}
+
 
                 <form method="POST" action="{{ url_for('main.register_view') }}">
                     <div class="mb-3">
