@@ -7,9 +7,10 @@ ProdManager é uma API RESTful desenvolvida com Python e Flask para o gerenciame
 
 - Python 3.12
 - Flask
-- Flask-JWT-Extended
+- Keycloak
 - SQLAlchemy
 - SQLite
+- Docker
 
 ## Endpoints
 
